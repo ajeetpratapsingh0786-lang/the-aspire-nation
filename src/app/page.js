@@ -5,25 +5,15 @@ import { createClient } from "@supabase/supabase-js";
 
 import {
   FaArrowRight,
-  FaBell,
-  FaBookOpen,
-  FaBriefcase,
   FaCalendarAlt,
   FaCheck,
   FaCheckCircle,
   FaClock,
   FaCrown,
-  FaExternalLinkAlt,
-  FaFileAlt,
   FaGlobeAsia,
   FaGraduationCap,
   FaNewspaper,
-  FaPenNib,
-  FaQuestionCircle,
-  FaSearch,
   FaStopwatch,
-  FaTrophy,
-  FaUserCircle,
 } from "react-icons/fa";
 
 const supabase = createClient(
@@ -41,17 +31,10 @@ const supabase = createClient(
 export const dynamic = "force-dynamic";
 
 async function getHomepageData() {
-  const [
-    newspaperResponse,
-    currentAffairsResponse,
-    jobsResponse,
-    resultsResponse,
-  ] = await Promise.all([
+  const [newspaperResponse, currentAffairsResponse] = await Promise.all([
     supabase
       .from("newspapers")
-      .select(
-        "id, title, edition_date, preview_url, is_published"
-      )
+      .select("id, title, edition_date, preview_url, is_published")
       .eq("is_published", true)
       .order("edition_date", { ascending: false })
       .limit(1)
@@ -59,52 +42,18 @@ async function getHomepageData() {
 
     supabase
       .from("current_affairs")
-      .select(
-        `
-          id,
-          title,
-          slug,
-          summary,
-          category,
-          image_url,
-          is_featured,
-          published_at
-        `
-      )
+      .select(`
+        id,
+        title,
+        slug,
+        summary,
+        category,
+        image_url,
+        is_featured,
+        published_at
+      `)
       .eq("is_published", true)
       .order("is_featured", { ascending: false })
-      .order("published_at", { ascending: false })
-      .limit(4),
-
-    supabase
-      .from("jobs")
-      .select(
-        `
-          id,
-          title,
-          description,
-          category,
-          official_link,
-          published_at
-        `
-      )
-      .eq("is_published", true)
-      .order("published_at", { ascending: false })
-      .limit(4),
-
-    supabase
-      .from("results")
-      .select(
-        `
-          id,
-          title,
-          description,
-          category,
-          official_link,
-          published_at
-        `
-      )
-      .eq("is_published", true)
       .order("published_at", { ascending: false })
       .limit(4),
   ]);
@@ -112,8 +61,6 @@ async function getHomepageData() {
   return {
     latestNewspaper: newspaperResponse.data || null,
     currentAffairs: currentAffairsResponse.data || [],
-    jobs: jobsResponse.data || [],
-    results: resultsResponse.data || [],
   };
 }
 
@@ -128,12 +75,7 @@ function formatDate(value) {
 }
 
 export default async function Home() {
-  const {
-    latestNewspaper,
-    currentAffairs,
-    jobs,
-    results,
-  } = await getHomepageData();
+  const { latestNewspaper, currentAffairs } = await getHomepageData();
 
   const featuredArticle =
     currentAffairs.find((article) => article.is_featured) ||
@@ -146,48 +88,7 @@ export default async function Home() {
 
   const breakingHeadline =
     featuredArticle?.title ||
-    jobs[0]?.title ||
-    results[0]?.title ||
-    "Daily exam-focused current affairs and updates for serious aspirants.";
-
-  const includedFeatures = [
-    {
-      title: "Daily Current Affairs",
-      description:
-        "Important national and international updates explained simply.",
-      icon: FaBookOpen,
-    },
-    {
-      title: "Editorial Analysis",
-      description:
-        "Exam-focused analysis for mains, essays and interviews.",
-      icon: FaPenNib,
-    },
-    {
-      title: "Government Jobs",
-      description:
-        "Latest official recruitment and examination notifications.",
-      icon: FaBriefcase,
-    },
-    {
-      title: "Daily E-Paper",
-      description:
-        "An organised edition designed to be completed quickly.",
-      icon: FaNewspaper,
-    },
-    {
-      title: "Daily Quiz",
-      description:
-        "Revise important topics through exam-oriented questions.",
-      icon: FaQuestionCircle,
-    },
-    {
-      title: "Results and Alerts",
-      description:
-        "Quick access to important exam results and official links.",
-      icon: FaBell,
-    },
-  ];
+    "Daily exam-focused current affairs and preparation updates for serious aspirants.";
 
   const timeComparison = [
     {
@@ -195,20 +96,20 @@ export default async function Home() {
       aspire: "One focused e-paper",
     },
     {
-      traditional: "Visit many websites",
+      traditional: "Visit many different websites",
       aspire: "One organised platform",
     },
     {
-      traditional: "2–3 hours of searching",
-      aspire: "About 20 minutes of reading",
+      traditional: "Spend 2–3 hours searching",
+      aspire: "Read in about 20 minutes",
     },
     {
-      traditional: "Information overload",
+      traditional: "Face information overload",
       aspire: "Only exam-relevant updates",
     },
     {
-      traditional: "Miss important notifications",
-      aspire: "Jobs and results in one place",
+      traditional: "Save random posts and PDFs",
+      aspire: "Use one structured archive",
     },
   ];
 
@@ -223,7 +124,7 @@ export default async function Home() {
 
       <Header />
 
-      {/* Main Hero */}
+      {/* Hero */}
 
       <section className="relative overflow-hidden bg-gradient-to-br from-white via-red-50 to-gray-100">
         <div className="absolute -left-40 top-20 h-80 w-80 rounded-full bg-red-200/40 blur-3xl" />
@@ -233,35 +134,36 @@ export default async function Home() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-black text-red-700 shadow-sm">
               <FaStopwatch />
-              Save 2–3 Hours Every Day
+              India&apos;s Daily Newspaper for Aspirants
             </div>
 
-            <h2 className="mt-6 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              Your Most Valuable Resource Isn&apos;t Notes.
-              <span className="block text-red-700">It&apos;s Time.</span>
-            </h2>
+            <h1 className="mt-6 text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+              Every Aspirant&apos;s
+              <span className="block text-red-700">
+                Morning Starts Here.
+              </span>
+            </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600">
-              Stop spending hours reading multiple newspapers, websites,
-              Telegram channels and random updates. The Aspire Nation gives
-              you one organised, exam-focused source every morning.
+              Save valuable preparation time with a single, exam-focused
+              platform. Read the daily e-paper, current affairs, editorial
+              analysis and important updates every morning—carefully selected
+              for UPSC, SSC, Banking, Railway, Defence and State exam aspirants.
             </p>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {[
-                "Read in about 20 minutes",
-                "Only exam-relevant information",
-                "Jobs, results and current affairs together",
-                "Built for UPSC, SSC, Banking and Railway aspirants",
+                "Daily E-Paper",
+                "Current Affairs",
+                "Editorial Analysis",
+                "Premium Preparation Resources",
               ].map((item) => (
                 <div
                   key={item}
                   className="flex items-start gap-3 rounded-xl bg-white/80 px-4 py-3 shadow-sm"
                 >
                   <FaCheckCircle className="mt-1 shrink-0 text-red-700" />
-                  <p className="font-semibold text-gray-800">
-                    {item}
-                  </p>
+                  <p className="font-semibold text-gray-800">{item}</p>
                 </div>
               ))}
             </div>
@@ -293,7 +195,7 @@ export default async function Home() {
           </div>
 
           <div className="relative">
-            <div className="absolute -left-6 -top-6 hidden rounded-2xl bg-white p-4 shadow-xl sm:block">
+            <div className="absolute -left-6 -top-6 z-10 hidden rounded-2xl bg-white p-4 shadow-xl sm:block">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
                 Average Reading Time
               </p>
@@ -328,128 +230,201 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Time-Saving Newspaper Section */}
+      {/* Today’s Edition */}
 
-      <section className="bg-gray-950 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <p className="font-black uppercase tracking-[0.22em] text-red-400">
-                Today&apos;s Time-Saving Edition
-              </p>
+      <section className="relative overflow-hidden bg-gray-950 text-white">
+        <div className="absolute -left-40 top-20 h-96 w-96 rounded-full bg-red-900/30 blur-3xl" />
+        <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-red-700/20 blur-3xl" />
 
-              <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
-                One Newspaper.
-                <span className="block text-red-500">
-                  Everything That Matters.
-                </span>
-              </h2>
-
-              <p className="mt-5 max-w-xl text-lg leading-8 text-gray-300">
-                The Aspire Nation is designed to reduce searching, scrolling
-                and information overload. Read the most important exam-focused
-                updates in one structured daily edition.
-              </p>
-
-              <div className="mt-7 grid gap-4 sm:grid-cols-2">
-                {[
-                  {
-                    value: "20 Min",
-                    label: "Focused Reading",
-                  },
-                  {
-                    value: "8 Pages",
-                    label: "Organised Edition",
-                  },
-                  {
-                    value: "1 Platform",
-                    label: "All Major Updates",
-                  },
-                  {
-                    value: "100%",
-                    label: "Exam Focused",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-5"
-                  >
-                    <p className="text-3xl font-black text-red-400">
-                      {item.value}
-                    </p>
-
-                    <p className="mt-1 text-sm font-semibold text-gray-300">
-                      {item.label}
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {latestNewspaper ? (
-                <div className="mt-8">
-                  <h3 className="text-2xl font-black">
-                    {latestNewspaper.title}
-                  </h3>
-
-                  <p className="mt-2 flex items-center gap-2 text-gray-400">
-                    <FaCalendarAlt />
-                    {formatDate(latestNewspaper.edition_date)}
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Link
-                      href={`/epaper/${latestNewspaper.id}`}
-                      className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-6 py-3 font-black text-white transition hover:bg-red-700"
-                    >
-                      Open Today&apos;s Edition
-                      <FaArrowRight />
-                    </Link>
-
-                    <Link
-                      href="/subscribe"
-                      className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-black text-white transition hover:bg-white/20"
-                    >
-                      Unlock Full Access
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <p className="mt-8 rounded-xl border border-white/10 bg-white/5 p-5 text-gray-300">
-                  The latest edition will appear here after publication.
-                </p>
-              )}
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-500/10 px-5 py-2 text-sm font-black uppercase tracking-[0.2em] text-red-300">
+              <FaNewspaper />
+              Today&apos;s Edition
             </div>
 
-            <div>
-              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-2xl">
-                {latestNewspaper?.preview_url ? (
-                  <img
-                    src={latestNewspaper.preview_url}
-                    alt={latestNewspaper.title}
-                    className="mx-auto max-h-[620px] w-full rounded-2xl object-contain"
-                  />
-                ) : (
-                  <div className="flex min-h-[460px] items-center justify-center rounded-2xl bg-gradient-to-br from-gray-800 to-red-950">
-                    <FaNewspaper
-                      size={90}
-                      className="text-white/50"
-                    />
-                  </div>
-                )}
+            <h2 className="mt-5 text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+              Your Daily Exam-Focused
+              <span className="block text-red-500">
+                Newspaper Is Ready.
+              </span>
+            </h2>
 
-                <div className="absolute bottom-7 left-7 right-7 rounded-2xl border border-white/10 bg-gray-950/85 p-4 backdrop-blur">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-red-400">
-                        Time-Smart Preparation
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-gray-300">
+              Read the most important current affairs, editorials and exam
+              updates in one structured eight-page digital newspaper.
+            </p>
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur">
+            <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="relative border-b border-white/10 p-6 sm:p-8 lg:border-b-0 lg:border-r">
+                <div className="absolute left-10 top-10 z-10 rounded-full bg-red-700 px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg">
+                  First Page Free
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-gray-900 p-4 shadow-2xl">
+                  {latestNewspaper?.preview_url ? (
+                    <img
+                      src={latestNewspaper.preview_url}
+                      alt={
+                        latestNewspaper.title ||
+                        "Today’s newspaper preview"
+                      }
+                      className="mx-auto max-h-[700px] w-full rounded-2xl object-contain"
+                    />
+                  ) : (
+                    <div className="flex min-h-[560px] flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-gray-800 to-red-950 text-center">
+                      <FaNewspaper className="text-8xl text-white/40" />
+
+                      <p className="mt-6 text-xl font-black text-white">
+                        Today&apos;s Edition Preview
                       </p>
 
-                      <p className="mt-1 font-black">
-                        Read what matters. Skip what doesn&apos;t.
+                      <p className="mt-2 max-w-sm text-gray-400">
+                        The front-page preview will appear here after the
+                        newspaper is published.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="absolute bottom-12 left-12 right-12 rounded-2xl border border-white/10 bg-gray-950/90 p-4 backdrop-blur">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest text-red-400">
+                        Free Preview
+                      </p>
+
+                      <p className="mt-1 font-black text-white">
+                        Read page one before subscribing
                       </p>
                     </div>
 
-                    <FaStopwatch className="text-3xl text-red-500" />
+                    <FaCheckCircle className="shrink-0 text-3xl text-red-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-red-400">
+                  Published Daily
+                </p>
+
+                <h3 className="mt-3 text-3xl font-black leading-tight sm:text-4xl">
+                  {latestNewspaper?.title ||
+                    "The Aspire Nation Daily E-Paper"}
+                </h3>
+
+                {latestNewspaper?.edition_date && (
+                  <p className="mt-4 flex items-center gap-2 font-semibold text-gray-400">
+                    <FaCalendarAlt className="text-red-500" />
+                    {formatDate(latestNewspaper.edition_date)}
+                  </p>
+                )}
+
+                <div className="mt-8">
+                  <h4 className="text-xl font-black text-white">
+                    Inside Today&apos;s Newspaper
+                  </h4>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    {[
+                      "National Current Affairs",
+                      "International Affairs",
+                      "Indian Economy",
+                      "Science and Technology",
+                      "Environment and Ecology",
+                      "Editorial Analysis",
+                      "Daily Practice MCQs",
+                      "Quick Revision Notes",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                      >
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-600">
+                          <FaCheck size={11} />
+                        </div>
+
+                        <p className="text-sm font-semibold text-gray-200">
+                          {item}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-600">
+                      <FaCrown />
+                    </div>
+
+                    <div>
+                      <p className="font-black text-white">
+                        Full Edition Is Premium
+                      </p>
+
+                      <p className="mt-1 text-sm leading-6 text-gray-300">
+                        The first page is available as a free preview. Premium
+                        members can securely read the complete eight-page
+                        edition.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  {latestNewspaper ? (
+                    <Link
+                      href={`/epaper/${latestNewspaper.id}`}
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-4 font-black text-white transition hover:bg-white/20"
+                    >
+                      <FaNewspaper />
+                      Read Free Preview
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/epaper"
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-4 font-black text-white transition hover:bg-white/20"
+                    >
+                      <FaNewspaper />
+                      View E-Paper
+                    </Link>
+                  )}
+
+                  <Link
+                    href="/subscribe"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-700 px-6 py-4 font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-red-800 hover:shadow-xl"
+                  >
+                    <FaCrown />
+                    Unlock Full Edition
+                  </Link>
+                </div>
+
+                <div className="mt-6 grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-white/5 py-5 text-center">
+                  <div className="px-2">
+                    <p className="text-2xl font-black text-red-400">8</p>
+                    <p className="mt-1 text-xs font-semibold text-gray-400">
+                      Daily Pages
+                    </p>
+                  </div>
+
+                  <div className="px-2">
+                    <p className="text-2xl font-black text-red-400">20</p>
+                    <p className="mt-1 text-xs font-semibold text-gray-400">
+                      Minutes
+                    </p>
+                  </div>
+
+                  <div className="px-2">
+                    <p className="text-2xl font-black text-red-400">
+                      100%
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-gray-400">
+                      Exam Focused
+                    </p>
                   </div>
                 </div>
               </div>
@@ -457,8 +432,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* Time Comparison */}
+            {/* Preparation Comparison */}
 
       <section className="bg-red-50">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
@@ -524,14 +498,144 @@ export default async function Home() {
             </h3>
 
             <p className="mx-auto mt-3 max-w-2xl leading-7 text-red-100">
-              Use that saved time for revision, mock tests, answer writing and
+              Use your saved time for revision, mock tests, answer writing and
               deeper preparation.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Featured Current Affair */}
+      {/* Premium Membership */}
+
+      <section className="bg-white px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="relative overflow-hidden rounded-[32px] bg-gray-950 text-white shadow-2xl">
+            <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-red-700/30 blur-3xl" />
+            <div className="absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-red-900/40 blur-3xl" />
+
+            <div className="relative grid items-stretch lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="p-8 sm:p-10 lg:p-14">
+                <div className="inline-flex items-center gap-2 rounded-full border border-red-400/30 bg-red-500/10 px-4 py-2 text-sm font-black uppercase tracking-[0.18em] text-red-300">
+                  <FaCrown />
+                  Aspire Nation Premium
+                </div>
+
+                <h2 className="mt-6 text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+                  One Subscription.
+                  <span className="block text-red-500">
+                    Complete Preparation.
+                  </span>
+                </h2>
+
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-300">
+                  Get complete access to the daily e-paper, current affairs,
+                  editorial analysis, archive, quizzes and premium preparation
+                  resources in one membership.
+                </p>
+
+                <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                  {[
+                    "Complete daily e-paper",
+                    "Full current affairs access",
+                    "Editorial analysis",
+                    "Premium archive",
+                    "Daily practice quiz",
+                    "Exam-focused revision notes",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-4"
+                    >
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-600">
+                        <FaCheck size={13} />
+                      </div>
+
+                      <p className="font-semibold text-gray-200">{item}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 flex flex-wrap gap-6 text-sm font-semibold text-gray-400">
+                  {[
+                    "Secure Payment",
+                    "Instant Access",
+                    "Cancel Anytime",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <FaCheckCircle className="text-red-500" />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center bg-gradient-to-br from-red-700 via-red-800 to-red-950 p-8 sm:p-10 lg:p-12">
+                <div className="relative w-full max-w-md rounded-3xl bg-white p-8 text-gray-950 shadow-2xl sm:p-10">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gray-950 px-5 py-2 text-xs font-black uppercase tracking-widest text-white shadow-lg">
+                    Most Popular
+                  </div>
+
+                  <div className="mt-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100">
+                    <FaCrown className="text-3xl text-red-700" />
+                  </div>
+
+                  <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-gray-500">
+                    Monthly Membership
+                  </p>
+
+                  <div className="mt-3 flex items-end gap-2">
+                    <span className="text-6xl font-black text-gray-950">
+                      ₹99
+                    </span>
+
+                    <span className="pb-2 text-lg font-bold text-gray-500">
+                      /month
+                    </span>
+                  </div>
+
+                  <p className="mt-5 leading-7 text-gray-600">
+                    Unlock every premium preparation resource with one simple
+                    monthly plan.
+                  </p>
+
+                  <Link
+                    href="/subscribe"
+                    className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-red-700 px-7 py-4 text-center text-lg font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-red-800 hover:shadow-xl"
+                  >
+                    Start Premium Membership
+                    <FaArrowRight />
+                  </Link>
+
+                  <p className="mt-4 text-center text-sm font-semibold text-gray-500">
+                    Full premium access begins immediately after payment.
+                  </p>
+
+                  <div className="mt-7 border-t border-gray-200 pt-6">
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      {[
+                        ["8", "Daily Pages"],
+                        ["365", "Editions"],
+                        ["100%", "Exam Focused"],
+                      ].map(([value, label]) => (
+                        <div key={label}>
+                          <p className="text-xl font-black text-red-700">
+                            {value}
+                          </p>
+
+                          <p className="mt-1 text-xs font-bold text-gray-500">
+                            {label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+            {/* Featured Current Affairs */}
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -647,196 +751,6 @@ export default async function Home() {
         )}
       </section>
 
-      {/* Jobs and Results */}
-
-      <section className="border-y border-gray-200 bg-gray-50">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-2">
-          <div className="rounded-3xl bg-white p-6 shadow-lg sm:p-8">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-black uppercase tracking-widest text-red-700">
-                  Latest Openings
-                </p>
-
-                <h2 className="mt-2 text-3xl font-black">
-                  Government Jobs
-                </h2>
-              </div>
-
-              <div className="rounded-2xl bg-red-100 p-4">
-                <FaBriefcase
-                  size={30}
-                  className="text-red-700"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {jobs.length > 0 ? (
-                jobs.map((job) => (
-                  <a
-                    key={job.id}
-                    href={job.official_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-2xl border border-gray-200 p-5 transition hover:border-red-200 hover:bg-red-50"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-black text-red-700">
-                        {job.category}
-                      </span>
-
-                      <span className="text-xs text-gray-500">
-                        {formatDate(job.published_at)}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-3 font-black">
-                      {job.title}
-                    </h3>
-
-                    <p className="mt-1 text-sm leading-6 text-gray-600">
-                      {job.description}
-                    </p>
-
-                    <span className="mt-3 inline-flex items-center gap-2 text-sm font-black text-red-700">
-                      Official Notification
-                      <FaExternalLinkAlt size={11} />
-                    </span>
-                  </a>
-                ))
-              ) : (
-                <p className="rounded-xl bg-gray-50 p-6 text-gray-500">
-                  No job notifications published yet.
-                </p>
-              )}
-            </div>
-
-            <Link
-              href="/jobs"
-              className="mt-6 inline-flex items-center gap-2 font-black text-red-700"
-            >
-              View All Jobs
-              <FaArrowRight />
-            </Link>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-lg sm:p-8">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-black uppercase tracking-widest text-red-700">
-                  Latest Declarations
-                </p>
-
-                <h2 className="mt-2 text-3xl font-black">
-                  Exam Results
-                </h2>
-              </div>
-
-              <div className="rounded-2xl bg-red-100 p-4">
-                <FaTrophy
-                  size={30}
-                  className="text-red-700"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {results.length > 0 ? (
-                results.map((result) => (
-                  <a
-                    key={result.id}
-                    href={result.official_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-2xl border border-gray-200 p-5 transition hover:border-red-200 hover:bg-red-50"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-black text-red-700">
-                        {result.category}
-                      </span>
-
-                      <span className="text-xs text-gray-500">
-                        {formatDate(result.published_at)}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-3 font-black">
-                      {result.title}
-                    </h3>
-
-                    <p className="mt-1 text-sm leading-6 text-gray-600">
-                      {result.description}
-                    </p>
-
-                    <span className="mt-3 inline-flex items-center gap-2 text-sm font-black text-red-700">
-                      Check Result
-                      <FaExternalLinkAlt size={11} />
-                    </span>
-                  </a>
-                ))
-              ) : (
-                <p className="rounded-xl bg-gray-50 p-6 text-gray-500">
-                  No result notifications published yet.
-                </p>
-              )}
-            </div>
-
-            <Link
-              href="/results"
-              className="mt-6 inline-flex items-center gap-2 font-black text-red-700"
-            >
-              View All Results
-              <FaArrowRight />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* What We Give */}
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="font-black uppercase tracking-widest text-red-700">
-            Everything in One Place
-          </p>
-
-          <h2 className="mt-3 text-4xl font-black sm:text-5xl">
-            What We Give You
-          </h2>
-
-          <p className="mt-4 text-lg leading-8 text-gray-600">
-            A focused daily preparation system built around the needs of
-            competitive exam aspirants.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {includedFeatures.map((feature) => {
-            const Icon = feature.icon;
-
-            return (
-              <div
-                key={feature.title}
-                className="group rounded-3xl border border-gray-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-red-200 hover:shadow-xl"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 transition group-hover:bg-red-700">
-                  <Icon className="text-2xl text-red-700 transition group-hover:text-white" />
-                </div>
-
-                <h3 className="mt-5 text-xl font-black">
-                  {feature.title}
-                </h3>
-
-                <p className="mt-3 leading-7 text-gray-600">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
       {/* Why Aspirants Choose Us */}
 
       <section className="border-y border-gray-200 bg-gradient-to-br from-gray-100 to-gray-200">
@@ -846,18 +760,18 @@ export default async function Home() {
               Editor&apos;s Note
             </p>
 
-            <h2 className="text-5xl font-black leading-tight md:text-6xl">
+            <h2 className="text-5xl font-black leading-tight drop-shadow-sm md:text-6xl">
               Why Aspirants Choose Us?
             </h2>
 
             <p className="mt-7 text-lg leading-8 text-gray-800">
               Aspirants already have enough to study. They should not have to
               spend valuable time searching for reliable current affairs,
-              jobs, results and exam updates across many different sources.
+              editorials and preparation material across many sources.
             </p>
 
             <p className="mt-4 text-lg leading-8 text-gray-800">
-              The Aspire Nation brings those important updates together in a
+              The Aspire Nation brings important information together in a
               simple, structured and exam-focused format.
             </p>
 
@@ -870,27 +784,25 @@ export default async function Home() {
           </div>
 
           <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl">
-            <h3 className="text-2xl font-black text-gray-900 md:text-3xl">
+            <h3 className="text-2xl font-black text-gray-800 drop-shadow-sm md:text-3xl">
               What makes it different?
             </h3>
 
             <div className="mt-7 space-y-4">
               {[
-                "Only exam-relevant news and updates",
+                "Only exam-relevant news and analysis",
                 "No entertainment or unnecessary content",
                 "Saves hours of searching every day",
                 "Simple language and organised presentation",
-                "Government jobs and result notifications",
                 "Editorial analysis for serious preparation",
                 "Daily quiz and revision support",
+                "Previous editions available in one archive",
                 "Secure premium e-paper access",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
                   <FaCheckCircle className="mt-1 shrink-0 text-red-700" />
 
-                  <p className="font-semibold text-gray-800">
-                    {item}
-                  </p>
+                  <p className="font-semibold text-gray-800">{item}</p>
                 </div>
               ))}
             </div>
@@ -905,82 +817,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* Premium Membership */}
-
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="overflow-hidden rounded-3xl bg-gray-950 text-white shadow-2xl">
-          <div className="grid lg:grid-cols-2">
-            <div className="p-8 sm:p-12">
-              <p className="font-black uppercase tracking-[0.2em] text-red-400">
-                Aspire Nation Premium
-              </p>
-
-              <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
-                One Subscription.
-                <span className="block text-red-500">
-                  Complete Preparation.
-                </span>
-              </h2>
-
-              <p className="mt-5 max-w-xl text-lg leading-8 text-gray-300">
-                Unlock the full e-paper, complete current affairs articles,
-                editorial analysis, archive access and premium preparation
-                resources.
-              </p>
-
-              <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                {[
-                  "Complete daily e-paper",
-                  "Full current affairs analysis",
-                  "Editorial access",
-                  "Archive access",
-                  "Premium quiz",
-                  "Secure reader",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center gap-3 text-sm font-semibold text-gray-200"
-                  >
-                    <FaCheck className="text-red-400" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center bg-gradient-to-br from-red-700 to-red-950 p-8 sm:p-12">
-              <div className="w-full max-w-md rounded-3xl bg-white p-8 text-gray-950 shadow-2xl">
-                <FaCrown className="text-5xl text-red-700" />
-
-                <p className="mt-6 text-sm font-black uppercase tracking-widest text-gray-500">
-                  Monthly Membership
-                </p>
-
-                <h3 className="mt-2 text-5xl font-black">
-                  ₹99
-                  <span className="text-lg font-bold text-gray-500">
-                    /month
-                  </span>
-                </h3>
-
-                <p className="mt-4 leading-7 text-gray-600">
-                  Start focused preparation with complete premium access.
-                </p>
-
-                <Link
-                  href="/subscribe"
-                  className="mt-7 block rounded-xl bg-red-700 px-7 py-3.5 text-center font-black text-white transition hover:bg-red-800"
-                >
-                  Start Premium Membership
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
+            {/* Final CTA */}
 
       <section className="bg-red-700 text-white">
         <div className="mx-auto max-w-5xl px-4 py-16 text-center sm:px-6">
@@ -992,7 +829,7 @@ export default async function Home() {
 
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-red-100">
             Begin your day with focused news, organised current affairs and
-            important exam updates—all in one place.
+            useful preparation material—all in one place.
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -1033,10 +870,7 @@ export default async function Home() {
               <h4 className="font-black">Explore</h4>
 
               <div className="mt-4 grid gap-3 text-sm text-gray-400">
-                <Link
-                  href="/epaper"
-                  className="hover:text-white"
-                >
+                <Link href="/epaper" className="hover:text-white">
                   E-Paper
                 </Link>
 
@@ -1047,18 +881,12 @@ export default async function Home() {
                   Current Affairs
                 </Link>
 
-                <Link
-                  href="/jobs"
-                  className="hover:text-white"
-                >
-                  Government Jobs
+                <Link href="/editorial" className="hover:text-white">
+                  Editorial
                 </Link>
 
-                <Link
-                  href="/results"
-                  className="hover:text-white"
-                >
-                  Results
+                <Link href="/subscribe" className="hover:text-white">
+                  Premium Membership
                 </Link>
               </div>
             </div>
@@ -1067,31 +895,19 @@ export default async function Home() {
               <h4 className="font-black">Company</h4>
 
               <div className="mt-4 grid gap-3 text-sm text-gray-400">
-                <Link
-                  href="/about"
-                  className="hover:text-white"
-                >
+                <Link href="/about" className="hover:text-white">
                   About
                 </Link>
 
-                <Link
-                  href="/contact"
-                  className="hover:text-white"
-                >
+                <Link href="/contact" className="hover:text-white">
                   Contact
                 </Link>
 
-                <Link
-                  href="/subscribe"
-                  className="hover:text-white"
-                >
-                  Premium
+                <Link href="/register" className="hover:text-white">
+                  Create Account
                 </Link>
 
-                <Link
-                  href="/login"
-                  className="hover:text-white"
-                >
+                <Link href="/login" className="hover:text-white">
                   Login
                 </Link>
               </div>

@@ -217,7 +217,7 @@ export default function ReaderPage() {
                 </div>
 
                 <Link
-                  href={`/epaper/${paper.id}`}
+                  href="/epaper"
                   className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 font-bold text-white transition hover:bg-red-700"
                 >
                   <FaArrowLeft />

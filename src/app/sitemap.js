@@ -1,52 +1,74 @@
 export default function sitemap() {
-  return [
+  const baseUrl = "https://theaspirenation.com";
+  const currentDate = new Date();
+
+  const pages = [
     {
-      url: "https://theaspirenation.com",
-      lastModified: new Date(),
+      path: "",
       changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: "https://theaspirenation.com/epaper",
-      lastModified: new Date(),
+      path: "/epaper",
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
-      url: "https://theaspirenation.com/current-affairs",
-      lastModified: new Date(),
+      path: "/current-affairs",
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
-      url: "https://theaspirenation.com/editorial",
-      lastModified: new Date(),
+      path: "/editorial",
       changeFrequency: "daily",
       priority: 0.8,
     },
     {
-      url: "https://theaspirenation.com/jobs",
-      lastModified: new Date(),
+      path: "/jobs",
       changeFrequency: "hourly",
       priority: 0.9,
     },
     {
-      url: "https://theaspirenation.com/search",
-      lastModified: new Date(),
+      path: "/results",
+      changeFrequency: "hourly",
+      priority: 0.9,
+    },
+    {
+      path: "/about",
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      path: "/contact",
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      path: "/subscribe",
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      path: "/search",
       changeFrequency: "weekly",
       priority: 0.6,
     },
     {
-      url: "https://theaspirenation.com/login",
-      lastModified: new Date(),
+      path: "/login",
       changeFrequency: "monthly",
       priority: 0.4,
     },
     {
-      url: "https://theaspirenation.com/subscribe",
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
+      path: "/register",
+      changeFrequency: "monthly",
+      priority: 0.4,
     },
   ];
+
+  return pages.map((page) => ({
+    url: `${baseUrl}${page.path}`,
+    lastModified: currentDate,
+    changeFrequency: page.changeFrequency,
+    priority: page.priority,
+  }));
 }

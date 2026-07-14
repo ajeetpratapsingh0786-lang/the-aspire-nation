@@ -4,91 +4,68 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata = {
+  metadataBase: new URL("https://theaspirenation.com"),
+
   title: {
-    default: "The Aspire Nation",
+    default:
+      "The Aspire Nation | Daily Current Affairs & E-Paper for Aspirants",
     template: "%s | The Aspire Nation",
   },
 
   description:
-    "The Aspire Nation is India's digital newspaper and preparation platform for UPSC, SSC, Banking, Railway, Defence, State PCS, CUET, NEET and all competitive exam aspirants. Read daily current affairs, government job notifications, editorials, e-paper, exam results and exam-focused analysis in one place. Every Aspirant's Morning Starts Here.",
+    "The Aspire Nation is a daily digital newspaper and preparation platform for UPSC, SSC, Banking, Railway, Defence, State PCS and other competitive exam aspirants. Read exam-focused current affairs, editorials, e-paper editions, government job updates and results in one place.",
 
-  keywords: [
-    "The Aspire Nation",
-    "The Aspire Nation Newspaper",
-    "The Aspire Nation E Paper",
-    "Current Affairs",
-    "Daily Current Affairs",
-    "Current Affairs Today",
-    "UPSC Current Affairs",
-    "SSC Current Affairs",
-    "Banking Current Affairs",
-    "Railway Current Affairs",
-    "Defence Current Affairs",
-    "State PCS Current Affairs",
-    "IAS Current Affairs",
-    "Current Affairs for UPSC",
-    "Current Affairs for SSC",
-    "Current Affairs for Banking",
-    "Current Affairs for Railway",
-    "Current Affairs PDF",
-    "UPSC Newspaper",
-    "Daily Newspaper for UPSC",
-    "Current Affairs Newspaper",
-    "Best Newspaper for Competitive Exams",
-    "Government Jobs",
-    "Latest Government Jobs",
-    "Government Job Notifications",
-    "Exam Results",
-    "Admit Card",
-    "Editorial Analysis",
-    "Daily Editorial",
-    "UPSC Editorial",
-    "SSC Preparation",
-    "UPSC Preparation",
-    "Bank PO Preparation",
-    "Railway Exam Preparation",
-    "Competitive Exam Preparation",
-    "Daily E-Paper",
-    "Exam Updates",
-    "UPSC News",
-    "SSC News",
-    "Banking News",
-    "Railway News",
-    "One Platform for Competitive Exams",
-  ],
+  applicationName: "The Aspire Nation",
 
   authors: [
     {
       name: "The Aspire Nation",
+      url: "https://theaspirenation.com",
     },
   ],
 
   creator: "The Aspire Nation",
-
   publisher: "The Aspire Nation",
 
-  metadataBase: new URL("https://theaspirenation.com"),
+  keywords: [
+    "The Aspire Nation",
+    "daily current affairs",
+    "competitive exam current affairs",
+    "daily e-paper for aspirants",
+    "UPSC current affairs",
+    "SSC current affairs",
+    "Banking current affairs",
+    "Railway current affairs",
+    "Defence current affairs",
+    "State PCS current affairs",
+    "editorial analysis",
+    "government job notifications",
+    "competitive exam results",
+    "UPSC newspaper",
+    "exam-focused newspaper",
+    "competitive exam preparation",
+  ],
 
-  alternates: {
-    canonical: "https://theaspirenation.com",
-  },
+  category: "Education",
 
   openGraph: {
     title:
-      "The Aspire Nation | Daily Current Affairs, Government Jobs & E-Paper",
+      "The Aspire Nation | Daily Current Affairs & E-Paper for Aspirants",
 
     description:
-      "Every Aspirant's Morning Starts Here. Daily Current Affairs, Government Jobs, Editorials, Exam Results and Premium E-Paper for UPSC, SSC, Banking, Railway, Defence, State PCS and all competitive exam aspirants.",
+      "Every Aspirant's Morning Starts Here. Read daily current affairs, editorials, exam updates and premium e-paper editions for competitive examinations.",
 
-    url: "https://theaspirenation.com",
+    url: "/",
 
     siteName: "The Aspire Nation",
 
@@ -104,13 +81,12 @@ export const metadata = {
       "The Aspire Nation | Daily Current Affairs & E-Paper",
 
     description:
-      "Daily Current Affairs, Editorials, Government Jobs, Results and Premium E-Paper for UPSC, SSC, Banking, Railway and all competitive examinations.",
+      "Daily current affairs, editorials, exam updates and premium e-paper editions for competitive exam aspirants.",
   },
 
   robots: {
     index: true,
     follow: true,
-    nocache: false,
 
     googleBot: {
       index: true,
@@ -122,17 +98,27 @@ export const metadata = {
     },
   },
 
-  category: "Education",
-
-  applicationName: "The Aspire Nation",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 
   referrer: "origin-when-cross-origin",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#b91c1c",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="en-IN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen bg-white text-gray-900">

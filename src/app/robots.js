@@ -7,5 +7,6 @@ export default function robots() {
       },
     ],
     sitemap: "https://theaspirenation.com/sitemap.xml",
+    host: "https://theaspirenation.com",
   };
 }
