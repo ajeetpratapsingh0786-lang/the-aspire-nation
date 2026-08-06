@@ -20,7 +20,20 @@ export async function ensureDailyRun({ force = false } = {}) {
   const supabase = createSupabaseAdmin();
   const { publicationDate, newsDate } = indiaDateParts();
   const { data: existing } = await supabase.from(RUN_TABLE).select("*").eq("publication_date", publicationDate).maybeSingle();
-  if (existing && !force) return existing;
+  if (existing && !force) {
+    // A transient serverless/API failure must not leave the next morning's
+    // edition permanently stuck. Resume from the saved stage without
+    // discarding completed English/Hindi pages.
+    if (["failed", "paused"].includes(String(existing.status || "").toLowerCase())) {
+      const resumed = await updateRun(supabase, existing.id, {
+        status: "queued",
+        errors: Array.isArray(existing.errors) ? existing.errors : [],
+      });
+      await log(supabase, existing.id, "warning", `Daily newsroom run automatically resumed from ${existing.stage}.`);
+      return resumed;
+    }
+    return existing;
+  }
   if (existing && force) {
     return updateRun(supabase, existing.id, {
       status: "queued", stage: "collect", current_page: 1, current_language: "ENGLISH",
@@ -125,7 +138,18 @@ async function generateNextImages(supabase, run, batchSize = 2) {
   let generated = 0;
   for (const article of batch) {
     try {
-      const buffer = await generateEditorialImage({ article, language: "ENGLISH" });
+      let buffer = null;
+      let imageError = null;
+      for (let attempt = 1; attempt <= 2; attempt += 1) {
+        try {
+          buffer = await generateEditorialImage({ article, language: "ENGLISH" });
+          break;
+        } catch (error) {
+          imageError = error;
+          if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 2500));
+        }
+      }
+      if (!buffer) throw imageError || new Error("Image generation failed after retry.");
       const bucket = process.env.NEWSROOM_IMAGE_BUCKET || "news-images";
       const safeStory = String(article.story_id || article.id).replace(/[^a-zA-Z0-9_-]/g, "-");
       const filePath = `${run.publication_date}/${safeStory}-${Date.now()}.png`;
@@ -155,8 +179,9 @@ async function validateRun(supabase, run) {
     const pages = new Set(active.map((a) => Number(a.page)));
     const missingPages = Array.from({ length: 8 }, (_, i) => i + 1).filter((page) => !pages.has(page));
     const broken = active.filter((a) => !a.headline || !a.body || !a.source_url).length;
-    results[language] = { stories: active.length, missingPages, incompleteStories: broken, images: active.filter((a) => a.image_url).length };
-    if (missingPages.length || broken || active.length < 30) valid = false;
+    const imageCount = active.filter((a) => a.image_url).length;
+    results[language] = { stories: active.length, missingPages, incompleteStories: broken, images: imageCount };
+    if (missingPages.length || broken || active.length < 30 || imageCount < 6) valid = false;
   }
   return { valid, results };
 }

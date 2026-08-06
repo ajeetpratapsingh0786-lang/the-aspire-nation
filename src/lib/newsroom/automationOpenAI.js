@@ -230,7 +230,7 @@ ${JSON.stringify(prepared)}`,
 
 function languageRule(language) {
   if (language === "HINDI") {
-    return `Write natural, clear Hindi used by a serious Hindi newspaper. Avoid literal translation, unnecessarily difficult Sanskritised vocabulary and government-notice language. Familiar English policy terms may remain where clearer. Do not start with PIB, a ministry, a date or “जानकारी दी गई”.`;
+    return `Write simple, natural, everyday Hindi suitable for students preparing for government examinations. Use short sentences and familiar words. Avoid literal translation, unnecessarily difficult Sanskritised vocabulary, bureaucratic language and long compound sentences. Explain unavoidable technical or policy terms in simple Hindi the first time they appear; familiar English terms may remain in brackets where clearer. The Hindi article must communicate the same verified facts as the English article, but must read as independently written Hindi. Do not start with PIB, a ministry, a date, “जानकारी दी गई”, “उक्त”, “तत्संबंधी” or similar official-notice wording.`;
   }
   return `Write in a confident, restrained Indian newspaper voice. Do not start with PIB, a ministry, a date, “according to”, or bureaucratic attribution.`;
 }
@@ -254,7 +254,7 @@ OUTPUT RULES:
 - Keep story_id, page, rank, editorial_role, treatment_type, section, source_name and source_url unchanged.
 - headline: active, clear and specific.
 - deck: one sentence explaining significance.
-- body: concise connected newspaper prose with no filler. Lead: 450-650 words maximum; major: 300-450; standard: 180-300; brief: 90-150. Use less when the verified material is limited. Never lengthen a story merely to fill space.
+- body: concise connected newspaper prose with no filler. Lead: 450-650 words maximum; major: 300-450; standard: 180-300; brief: 90-150. Use less when the verified material is limited. Never lengthen a story merely to fill space.${isHindi ? " Use simple Hindi, short paragraphs and direct explanations. Avoid difficult synonyms when a common word is available." : ""}
 - fact_box: 4-8 one-line exam facts, each beginning “- ”. For a Page 7 scheme unit, cover why in news, objective, beneficiaries, implementing ministry, verified funding pattern when available, key features, benefits, concerns, implementation challenges, way forward and exam snapshot. Present benefits and concerns in a balanced, evidence-grounded manner.
 - exam_connection: exactly three lines: ${isHindi ? "प्रारंभिक परीक्षा:, मुख्य परीक्षा:, आगे क्या देखें:" : "Prelims:, Mains:, Watch Next:"}
 - caption: factual visual caption.

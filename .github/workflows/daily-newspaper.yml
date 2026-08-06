@@ -1,0 +1,137 @@
+name: Daily Bilingual Newspaper
+
+on:
+  schedule:
+    # 20:30 UTC = 02:00 India time. Gives the newsroom several hours to
+    # complete both 8-page editions before the morning review.
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+    inputs:
+      force_restart:
+        description: "Restart today's run from collection"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: daily-bilingual-newspaper
+  cancel-in-progress: false
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    permissions:
+      contents: read
+
+    env:
+      SITE_URL: https://theaspirenation.com
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+    steps:
+      - name: Validate automation secret
+        shell: bash
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET GitHub Actions secret is missing."
+            exit 1
+          fi
+
+      - name: Start or safely resume today's edition
+        shell: bash
+        run: |
+          FORCE=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force_restart }}" = "true" ]; then
+            FORCE="?force=true"
+          fi
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --connect-timeout 20 --max-time 330 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/newsroom-start$FORCE"
+
+      - name: Produce all English and Hindi pages, visuals and validation
+        shell: bash
+        run: |
+          set -uo pipefail
+          completed=0
+
+          for attempt in $(seq 1 30); do
+            echo "========== Worker call $attempt/30 =========="
+            response_file="$(mktemp)"
+            http_code=$(curl --silent --show-error \
+              --retry 3 --retry-all-errors --connect-timeout 20 --max-time 330 \
+              -H "Authorization: Bearer $CRON_SECRET" \
+              -o "$response_file" -w "%{http_code}" \
+              "$SITE_URL/api/cron/newsroom-worker" || true)
+
+            cat "$response_file"
+            echo
+
+            if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+              echo "Worker returned HTTP $http_code. Waiting before retry."
+              rm -f "$response_file"
+              sleep 45
+              continue
+            fi
+
+            state=$(python - "$response_file" <<'PY'
+import json, sys
+p=sys.argv[1]
+try:
+    data=json.load(open(p, encoding="utf-8"))
+except Exception:
+    print("continue")
+    raise SystemExit
+
+def walk(x):
+    if isinstance(x, dict):
+        yield x
+        for v in x.values():
+            yield from walk(v)
+    elif isinstance(x, list):
+        for v in x:
+            yield from walk(v)
+
+items=list(walk(data))
+if any(i.get("valid") is False for i in items):
+    print("validation_failed")
+elif any(i.get("published") is True for i in items):
+    print("complete")
+elif any(i.get("waitingForApproval") is True for i in items):
+    print("complete")
+elif any(i.get("idle") is True and "No pending automation run" in str(i.get("message", "")) for i in items):
+    print("complete")
+else:
+    print("continue")
+PY
+)
+            rm -f "$response_file"
+
+            if [ "$state" = "validation_failed" ]; then
+              echo "Edition validation failed. Open Launch Readiness and the edition review screen."
+              exit 1
+            fi
+
+            if [ "$state" = "complete" ]; then
+              completed=1
+              echo "Both bilingual editions are complete and ready for editorial approval."
+              break
+            fi
+
+            sleep 30
+          done
+
+          if [ "$completed" -ne 1 ]; then
+            echo "The production loop reached its safety limit before completion."
+            exit 1
+          fi
+
+      - name: Final publication-state check
+        shell: bash
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --connect-timeout 20 --max-time 330 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$SITE_URL/api/cron/newsroom-publish"
+          echo
+          echo "Morning edition workflow finished. NEWSROOM_AUTO_PUBLISH=false keeps it ready for your approval."
