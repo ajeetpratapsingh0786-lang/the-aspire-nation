@@ -74,37 +74,14 @@ jobs:
               continue
             fi
 
-            state=$(python - "$response_file" <<'PY'
-import json, sys
-p=sys.argv[1]
-try:
-    data=json.load(open(p, encoding="utf-8"))
-except Exception:
-    print("continue")
-    raise SystemExit
-
-def walk(x):
-    if isinstance(x, dict):
-        yield x
-        for v in x.values():
-            yield from walk(v)
-    elif isinstance(x, list):
-        for v in x:
-            yield from walk(v)
-
-items=list(walk(data))
-if any(i.get("valid") is False for i in items):
-    print("validation_failed")
-elif any(i.get("published") is True for i in items):
-    print("complete")
-elif any(i.get("waitingForApproval") is True for i in items):
-    print("complete")
-elif any(i.get("idle") is True and "No pending automation run" in str(i.get("message", "")) for i in items):
-    print("complete")
-else:
-    print("continue")
-PY
-)
+            state=$(jq -r '
+              if any(.. | objects; .valid? == false) then "validation_failed"
+              elif any(.. | objects; .published? == true) then "complete"
+              elif any(.. | objects; .waitingForApproval? == true) then "complete"
+              elif any(.. | objects; .idle? == true and ((.message? // "") | contains("No pending automation run"))) then "complete"
+              else "continue"
+              end
+            ' "$response_file" 2>/dev/null || echo "continue")
             rm -f "$response_file"
 
             if [ "$state" = "validation_failed" ]; then
