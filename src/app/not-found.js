@@ -1,39 +1,17 @@
 import Link from "next/link";
-import { FaArrowLeft, FaNewspaper } from "react-icons/fa";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-white via-red-50 to-gray-100 px-4">
-      <div className="w-full max-w-2xl text-center">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-red-700 text-3xl text-white shadow-xl">
-          <FaNewspaper />
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
+      <section className="max-w-xl rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+        <p className="text-sm font-black uppercase tracking-[0.24em] text-red-700">The Aspire Nation</p>
+        <h1 className="mt-4 text-4xl font-black text-slate-950">Page not found</h1>
+        <p className="mt-4 text-slate-600">The page may have moved, or the edition is no longer available at this address.</p>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
+          <Link href="/" className="rounded-xl bg-slate-950 px-5 py-3 font-black text-white">Go to homepage</Link>
+          <Link href="/newspaper" className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-black text-slate-800">Open newspaper archive</Link>
         </div>
-
-        <p className="mt-8 text-7xl font-black text-red-700 sm:text-9xl">
-          404
-        </p>
-
-        <h1 className="mt-4 text-3xl font-black text-gray-950 sm:text-5xl">
-          Page Not Found
-        </h1>
-
-        <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-gray-600">
-          The page you are looking for may have been moved, removed or is
-          temporarily unavailable.
-        </p>
-
-        <Link
-          href="/"
-          className="mt-8 inline-flex items-center gap-2 rounded-xl bg-red-700 px-7 py-3.5 font-black text-white transition hover:bg-red-800"
-        >
-          <FaArrowLeft />
-          Return to Homepage
-        </Link>
-
-        <p className="mt-8 text-sm font-semibold text-gray-500">
-          Every Aspirant&apos;s Morning Starts Here.
-        </p>
-      </div>
+      </section>
     </main>
   );
 }

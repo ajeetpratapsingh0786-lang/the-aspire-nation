@@ -1,16 +1,20 @@
 {
   "name": "the-aspire-nation",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preflight": "node scripts/preflight.mjs",
+    "release:check": "npm run preflight && npm run lint && npm run build"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.0",
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.111.0",
     "next": "16.2.10",
+    "openai": "^7.3.0",
     "razorpay": "^2.9.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/cron/newsroom-start", "schedule": "30 21 * * *" },
+    { "path": "/api/cron/newsroom-worker", "schedule": "*/10 22-23 * * *" },
+    { "path": "/api/cron/newsroom-worker", "schedule": "0,10 0 * * *" },
+    { "path": "/api/cron/newsroom-publish", "schedule": "20 0 * * *" }
+  ],
+  "functions": {
+    "src/app/api/cron/newsroom-worker/route.js": { "maxDuration": 300 },
+    "src/app/api/cron/newsroom-publish/route.js": { "maxDuration": 300 }
+  }
+}

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -59,7 +59,8 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      const returnTo = searchParams.get("returnTo");
+      window.location.href = returnTo?.startsWith("/") ? returnTo : "/dashboard";
     } catch (error) {
       console.error("Login failed:", error);
 
