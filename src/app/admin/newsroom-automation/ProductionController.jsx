@@ -33,14 +33,13 @@ export default function ProductionController({ latestRun }) {
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
   const [run, setRun] = useState(latestRun || null);
+  const [controlBusy, setControlBusy] = useState("");
 
   useEffect(() => {
     setRun(latestRun || null);
   }, [latestRun]);
 
   useEffect(() => {
-    if (!running) return undefined;
-
     const interval = setInterval(async () => {
       try {
         const response = await fetch("/api/admin/newsroom/status", { cache: "no-store" });
@@ -52,7 +51,7 @@ export default function ProductionController({ latestRun }) {
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [running]);
+  }, []);
 
   const progress = useMemo(() => progressFor(run), [run]);
   const effectiveStatus = run?.display_status || run?.status;
@@ -98,6 +97,30 @@ export default function ProductionController({ latestRun }) {
 
     setHistory((current) => [...payload.results, ...current].slice(0, 18));
     return payload;
+  }
+
+  async function controlProduction(action, confirmation) {
+    if (controlBusy || running) return;
+    if (confirmation && !window.confirm(confirmation)) return;
+
+    setControlBusy(action);
+    setMessage("Updating newsroom production…");
+    try {
+      const response = await fetch("/api/admin/newsroom/control-production", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.ok) throw new Error(payload.error || "Production control failed.");
+      setRun(payload.run || null);
+      setMessage(payload.message || "Production updated.");
+      router.refresh();
+    } catch (error) {
+      setMessage(error?.message || "Could not update production.");
+    } finally {
+      setControlBusy("");
+    }
   }
 
   async function startContinuousProduction() {
@@ -163,11 +186,11 @@ export default function ProductionController({ latestRun }) {
             One button starts or resumes collection, English, Hindi, visuals, validation and publication approval.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex max-w-3xl flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={startContinuousProduction}
-            disabled={running || needsReview}
+            disabled={running || needsReview || Boolean(controlBusy)}
             className="rounded-xl bg-red-700 px-5 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             {running
@@ -184,6 +207,52 @@ export default function ProductionController({ latestRun }) {
                         ? "Continue Full Production"
                         : "Generate Today's Edition"}
           </button>
+
+          <button
+            type="button"
+            onClick={() => controlProduction("restart_fresh", "Restart today's edition from the beginning? Existing generated stories for this unfinished edition will be cleared.")}
+            disabled={running || Boolean(controlBusy) || alreadyComplete}
+            className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            {controlBusy === "restart_fresh" ? "Restarting…" : "Restart Fresh"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => controlProduction("cancel", "Cancel the current production? It will not resume automatically unless you restart it.")}
+            disabled={running || Boolean(controlBusy) || !run || alreadyComplete}
+            className="rounded-xl border border-red-300 bg-white px-4 py-3 text-sm font-black text-red-700 disabled:cursor-not-allowed disabled:text-slate-400"
+          >
+            {controlBusy === "cancel" ? "Cancelling…" : "Cancel Edition"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => controlProduction("archive", "Archive this unfinished edition without publishing it?")}
+            disabled={running || Boolean(controlBusy) || !run || alreadyComplete}
+            className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 disabled:cursor-not-allowed disabled:text-slate-400"
+          >
+            {controlBusy === "archive" ? "Archiving…" : "Archive"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => controlProduction("new_edition")}
+            disabled={running || Boolean(controlBusy) || (run && !["cancelled", "archived"].includes(effectiveStatus))}
+            className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+          >
+            {controlBusy === "new_edition" ? "Creating…" : "New Edition"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => controlProduction("force_new_morning", "Force a completely fresh morning run? Existing unfinished content for today's edition will be cleared.")}
+            disabled={running || Boolean(controlBusy) || alreadyComplete}
+            className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+          >
+            {controlBusy === "force_new_morning" ? "Resetting…" : "Force New Morning"}
+          </button>
+
           {running ? (
             <button type="button" onClick={stopProduction} className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
               Stop Safely
