@@ -124,7 +124,11 @@ function pageStories(run, page) {
 async function selectImageArticles(supabase, run) {
   const { data, error } = await supabase.from("news_articles").select("*").eq("edition_id", run.english_edition_id);
   if (error) throw error;
-  return (data || []).filter((a) => !a.is_deleted && !a.image_url).sort((a, b) => {
+
+  // IMPORTANT: keep this list stable across invocations. The old code removed
+  // articles that already had images and then also applied image_index, which
+  // caused later pulses to skip unprocessed stories.
+  return (data || []).filter((a) => !a.is_deleted).sort((a, b) => {
     const score = (x) => (Number(x.page) === 1 ? 1000 : 0) + (/hero|lead|major/.test(String(x.slot)) ? 500 : 0) - Number(x.display_order || 99);
     return score(b) - score(a);
   }).slice(0, IMAGE_TARGET);
@@ -137,6 +141,8 @@ async function generateNextImages(supabase, run, batchSize = 2) {
   if (!batch.length) return { finished: true, generated: 0 };
   let generated = 0;
   for (const article of batch) {
+    // A previous attempt may already have completed this stable slot.
+    if (article.image_url) continue;
     try {
       let buffer = null;
       let imageError = null;
@@ -214,7 +220,7 @@ async function publishBoth(supabase, run) {
 
 export async function processNextAutomationStep() {
   const supabase = createSupabaseAdmin();
-  const { data: run, error } = await supabase.from(RUN_TABLE).select("*").in("status", ["queued", "running", "ready_to_publish"]).order("publication_date", { ascending: true }).limit(1).maybeSingle();
+  const { data: run, error } = await supabase.from(RUN_TABLE).select("*").in("status", ["queued", "running", "ready_to_publish"]).order("publication_date", { ascending: false }).limit(1).maybeSingle();
   if (error) throw error;
   if (!run) return { idle: true, message: "No pending automation run." };
 
@@ -238,7 +244,14 @@ export async function processNextAutomationStep() {
       const page = Number(run.current_page || 1);
       const stories = pageStories(run, page);
       if (!stories.length) throw new Error(`No assigned stories for ${language} Page ${page}.`);
-      const packages = await writePagePackage({ assignedStories: stories, page, language, newsDate: run.news_date, publicationDate: run.publication_date });
+      let packages = await writePagePackage({ assignedStories: stories, page, language, newsDate: run.news_date, publicationDate: run.publication_date });
+      if (!Array.isArray(packages) || packages.length < stories.length) {
+        await log(supabase, run.id, "warning", `${language} Page ${page} returned ${packages?.length || 0}/${stories.length} units; retrying once.`);
+        packages = await writePagePackage({ assignedStories: stories, page, language, newsDate: run.news_date, publicationDate: run.publication_date });
+      }
+      if (!Array.isArray(packages) || packages.length < Math.max(1, stories.length - 1)) {
+        throw new Error(`${language} Page ${page} remained incomplete after retry (${packages?.length || 0}/${stories.length} units).`);
+      }
       const editionId = language === "HINDI" ? run.hindi_edition_id : run.english_edition_id;
       const saved = await savePageArticles(supabase, editionId, language, page, packages);
       let nextLanguage = language;
